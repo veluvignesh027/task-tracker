@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang/glog"
 	_ "github.com/joho/godotenv/autoload"
 
 	"task-tracker/internal/database"
@@ -34,6 +35,6 @@ func NewServer() *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-
+    glog.Info("HTTP Server Listening on: ",server.Addr)
 	return server
 }

@@ -2,10 +2,10 @@ package database
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"task-tracker/internal/models"
 
+	log "github.com/golang/glog"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
@@ -14,7 +14,7 @@ import (
 
 // Service represents a service that interacts with a database.
 type Service interface {
-   GetDBInstance()  *gorm.DB 
+	GetDBInstance() *gorm.DB
 }
 
 type service struct {
@@ -35,14 +35,14 @@ func New() Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
-
-    connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=%s", host, port, username, password, database, schema)
+    log.Info("Connecting to the database..") 
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=%s", host, port, username, password, database, schema)
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-    /*connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
+	/*connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -50,23 +50,24 @@ func New() Service {
 	dbInstance = &service{
 		db: db,
 	}
-	
-    err = dbInstance.CreateAllSchemas(&models.User{}, &models.Ticket{}, &models.Story{})
-    if err != nil{
-        log.Fatal(err)
-    }
 
-    return dbInstance
+	err = dbInstance.CreateAllSchemas(&models.User{}, &models.Ticket{}, &models.Story{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    log.Info("Database connected successfully!")
+	return dbInstance
 }
 
-func (s *service) CreateAllSchemas(dst ...interface{})error{
-    err := s.db.AutoMigrate(dst...)
-    if err != nil{
-        log.Println(err)
-    }
-    return err
+func (s *service) CreateAllSchemas(dst ...interface{}) error {
+	err := s.db.AutoMigrate(dst...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return err
 }
 
-func (s *service) GetDBInstance() *gorm.DB{
-    return s.db
+func (s *service) GetDBInstance() *gorm.DB {
+	return s.db
 }

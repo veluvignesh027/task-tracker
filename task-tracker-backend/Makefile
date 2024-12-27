@@ -11,7 +11,7 @@ build:
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run cmd/api/main.go -logtostderr=true -v=3
 # Create DB container
 docker-run:
 	@if docker compose up -d --build 2>/dev/null; then \

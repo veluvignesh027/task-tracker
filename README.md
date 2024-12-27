@@ -1,4 +1,9 @@
 
+| |_ __ _ ___| | __    | |_ _ __ __ _  ___| | _____ _ __
+| __/ _` / __| |/ /____| __| '__/ _` |/ __| |/ / _ \ '__|
+| || (_| \__ \   <_____| |_| | | (_| | (__|   <  __/ |
+ \__\__,_|___/_|\_\     \__|_|  \__,_|\___|_|\_\___|_|
+
 # Project task-tracker
 
 The issue tracking system is designed to streamline the management of project-related issues by providing a centralized platform for logging, monitoring, and resolving tasks.
