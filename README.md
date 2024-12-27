@@ -1,8 +1,6 @@
-
-![TASK](https://github.com/user-attachments/assets/ce23f659-82dd-4154-bfd4-d51b45b08973)
+![TASK](https://github.com/user-attachments/assets/c9dc71ab-55fd-4e0c-b5c3-9b20e04ee651)
 
 # Project task-tracker
-
 The issue tracking system is designed to streamline the management of project-related issues by providing a centralized platform for logging, monitoring, and resolving tasks.
 
 ## Getting Started
