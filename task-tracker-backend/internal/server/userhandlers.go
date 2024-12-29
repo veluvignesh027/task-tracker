@@ -94,11 +94,43 @@ func (s *Server) DeleteUser(c *gin.Context) {
 }
 
 func (s *Server) GetHomeDataForUser(c *gin.Context){
-    //var homedata models.HomeData
+    var homedata models.HomeData
+    
+    homedata.UserName = c.Query("username")
     dbins := s.db.GetDBInstance()
     
-    dbins.Where("")
+    uid, err := getUserIDFromUserName(dbins, homedata.UserName)
+    if err != nil{
+        log.Error(err)
+        c.JSON(http.StatusBadRequest, err)
+        return
+    }
+    homedata.UserID = uid
+    homedata.UserEmail = homedata.UserName
+    
+    err = dbins.Model(&models.Story{}).Where("user_assigned_id = ?", uid).Count(&homedata.StoryCount).Error
+    if err != nil{
+        log.Error(err)
+        c.JSON(http.StatusBadRequest, err)
+        return
+    }
+    
 
+    err = dbins.Model(&models.Ticket{}).Where("user_assigned_id = ?", uid).Count(&homedata.TicketCount).Error
+    if err != nil{
+        log.Error(err)
+        c.JSON(http.StatusBadRequest, err)
+        return
+    }
+
+    // Taking the count of completed tickets
+    dbins.Model(&models.Ticket{}).Where("user_assigned_id = ? AND status = ? OR status = ?",uid, models.Completed, models.Closed).Count(&homedata.CompletedCount)
+
+    // Taking the count of Pending tickets
+    dbins.Model(&models.Ticket{}).Where("user_assigned_id = ? AND status = ? OR status = ?",uid, models.Assigned, models.New).Count(&homedata.CompletedCount)
+
+    
+    c.JSON(http.StatusOK, homedata)
 }
 
 

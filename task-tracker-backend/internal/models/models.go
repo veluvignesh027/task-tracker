@@ -35,12 +35,13 @@ type UserStruct struct{
 }
 
 type HomeData struct{
+    UserID int `json:"userid"`
     UserName string `json:"username"`
     UserEmail string `json:"useremail"`
-    StoryCount int `json:"story_count"`
-    TicketCount int `json:"ticket_count"`
-    PendingCount int `json:"pending_count"`
-    CompletedCount int `json:"completed_count"`
+    StoryCount int64 `json:"story_count"`
+    TicketCount int64 `json:"ticket_count"`
+    PendingCount int64 `json:"pending_count"`
+    CompletedCount int64 `json:"completed_count"`
 }
 
 
