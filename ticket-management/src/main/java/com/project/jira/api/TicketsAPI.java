@@ -19,7 +19,7 @@ public class TicketsAPI {
 	
 	@Autowired
 	private TicketService ticketService;
-
+	// api is used to get tickets by assignee
 	@GetMapping("/ticket/assignee/{assignee}")
 	public ResponseEntity<List<Tickets>> getTicketsByAssignee(@PathVariable String assignee) {
 		Optional<List<Tickets>> ticketsList = ticketService.getTicketsByAssignee(assignee);
