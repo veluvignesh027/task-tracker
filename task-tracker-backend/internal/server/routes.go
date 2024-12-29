@@ -2,9 +2,11 @@ package server
 
 import (
 	"errors"
-	log "github.com/golang/glog"
 	"net/http"
+	"strconv"
 	"task-tracker/internal/models"
+
+	log "github.com/golang/glog"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -24,7 +26,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	v1 := r.Group("/api/v1/story")
 	{
 		v1.GET("/get/:id", s.GetHandler)
-		v1.POST("/create", s.PostHandler)
+        v1.GET("/getall/:id", s.GetAllStory)
+        v1.POST("/create", s.PostHandler)
 		v1.PUT("/update/:id", s.PutHandler)
 		v1.DELETE("/delete/:id", s.DeleteHandler)
 	}
@@ -35,10 +38,23 @@ func (s *Server) RegisterRoutes() http.Handler {
 		user.GET("/get", s.GetUserByEmail)
 		user.POST("/create", s.CreateUser)
 		user.DELETE("/delete/:id", s.DeleteUser)
-	    user.GET("/homedata/:id",s.GetHomeDataForUser)
+	    user.GET("/homedata",s.GetHomeDataForUser)
     }
     log.Info("Registered all the routes for User & Story handles")
 	return r
+}
+
+func (s *Server) GetAllStory(c *gin.Context){
+    var stories []models.Story
+    userid := c.Param("id")
+    
+    dbins := s.db.GetDBInstance()
+    if err := dbins.Where("user_assigned_id = ?", userid).Find(&stories).Error; err != nil{
+        c.JSON(http.StatusNotFound, err)
+        return
+    }
+
+    c.JSON(http.StatusOK, stories)
 }
 
 // Method: GET
@@ -77,14 +93,17 @@ func (s *Server) PostHandler(c *gin.Context) {
 
     dbinc := s.db.GetDBInstance()
     creator, err  := getUserIDFromUserName(dbinc, story.UserCreated)
-	if err != nil{
+	if err != nil || creator == 0{
         log.Error(err)
         c.JSON(http.StatusBadRequest, gin.H{"error":"not a valid user"})
+        return
     }
+    log.Info("Creator ID from the db: ", creator, " Error: ", err)
     assigner, err := getUserIDFromUserName(dbinc, story.UserAssigned)
-    if err != nil{
+    if err != nil || assigner == 0{
         log.Error(err)
         c.JSON(http.StatusBadRequest, gin.H{"error":"not a valid user"})
+        return
     }
 
     dbStoryObj := models.ParseStoryObj(story, creator, assigner)
@@ -98,8 +117,15 @@ func (s *Server) PostHandler(c *gin.Context) {
 }
 
 func (s *Server) PutHandler(c *gin.Context) {
-	var story models.StoryStruct
-	if err := c.ShouldBind(&story); err != nil {
+    storyid, err := strconv.Atoi(c.Param("id"))
+    if err != nil{
+        log.Error(err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    var story models.StoryStruct
+	if err = c.ShouldBind(&story); err != nil {
 		log.Error("Error binding the body with struct.", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	    return
@@ -121,8 +147,10 @@ func (s *Server) PutHandler(c *gin.Context) {
     }
 
     dbStoryObj := models.ParseStoryObj(story,creator ,assigner)
-	err = dbinc.FirstOrCreate(&models.Story{}, dbStoryObj).Error
-	if err != nil {
+    dbStoryObj.StoryID = storyid
+    dbStoryObj.ID = uint(storyid)
+    err = dbinc.Save(dbStoryObj).Error
+    if err != nil {
         log.Error(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	    return
@@ -155,7 +183,7 @@ func (s *Server) DeleteHandler(c *gin.Context) {
 }
 
 func getUserIDFromUserName(db *gorm.DB, name string)(int, error){
-    var id int
+    var id int 
 
     res := db.Model(&models.User{}).Select("user_id").Where("email = ?", name).Scan(&id)
     if res.Error != nil{
@@ -165,3 +193,4 @@ func getUserIDFromUserName(db *gorm.DB, name string)(int, error){
     
     return id, nil
 }
+
