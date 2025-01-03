@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.project</groupId>
-	<artifactId>ticket-management</artifactId>
+	<artifactId>ticketmanagement</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>jira</name>
-	<description>Task Tracker Backend</description>
+	<name>TaskTracker</name>
+	<description>Task Tracker Application</description>
 	<url/>
 	<licenses>
 		<license/>
